@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>春联生成器</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/mdui/1.0.2/css/mdui.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcdn.net/ajax/libs/mdui/1.0.2/js/mdui.min.js"></script>
+    <style>
+        .show-parent {
+            width: 50%;
+        }
+
+        .show {
+            margin-top: 20px !important;
+            transform-origin: center;
+        }
+
+        .choose {
+            margin-left: 20px;
+        }
+    </style>
+    <script src="chinese-convert.js"></script>
+    <script src="index.js"></script>
+    <script src="assets.js"></script>
+</head>
+
+<body>
+    <div class="mdui-appbar">
+        <div class="mdui-toolbar mdui-color-indigo">
+            <a href="javascript:;" class="mdui-btn mdui-btn-icon">
+                <i class="mdui-icon material-icons">menu</i>
+            </a>
+            <a href="javascript:;" class="mdui-typo-headline">春联生成器</a>
+            <div class="mdui-toolbar-spacer"></div>
+            <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-dialog="{target: '#infomation'}">
+                <i class="mdui-icon material-icons">more_vert</i>
+            </a>
+        </div>
+    </div>
+    <div class="mdui-container">
+        <img class="mdui-hidden" id="bg-img" src="./assets/bg1.jpg" width="200px" height="200px">
+        <div class="mdui-row">
+            <div class="mdui-col-xs-6 show-parent">
+                <table class="show">
+                    <tr>
+                        <td></td>
+                        <td><canvas id="cv-pi"></canvas></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><canvas id="cv-shang"></canvas></td>
+                        <td></td>
+                        <td><canvas id="cv-xia"></canvas></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="mdui-col-xs-6">
+                <div class="mdui-typo">
+                    <h2>春联生成器</h2>
+                    <hr>
+                </div>
+                <br>
+                <div class="mdui-panel mdui-panel-gapless" mdui-panel>
+                    <div class="mdui-panel-item mdui-panel-item-open">
+                        <div class="mdui-panel-item-header">
+                            <div class="mdui-panel-item-title"><i class="mdui-icon material-icons">textsms</i> 文本</div>
+                            <i class="mdui-panel-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
+                        </div>
+                        <div class="mdui-panel-item-body">
+                            <div id="outer-pi" class="mdui-textfield">
+                                <input id="pi" class="mdui-textfield-input" type="text" value="四季兴隆"
+                                    onchange="validate()" placeholder="横批" maxlength="7" />
+                                <div class="mdui-textfield-helper">横批最多7个字，只能使用汉字</div>
+                            </div>
+                            <div id="outer-shang" class="mdui-textfield">
+                                <input id="shang" class="mdui-textfield-input" type="text" value="事事如意大吉祥"
+                                    onchange="validate()" placeholder="上联" />
+                                <div class="mdui-textfield-helper">上联只能使用汉字，并且须和下联长度相同</div>
+                            </div>
+                            <div id="outer-xia" class="mdui-textfield">
+                                <input id="xia" class="mdui-textfield-input" type="text" value="家家顺心永安康"
+                                    onchange="validate()" placeholder="下联" />
+                                <div class="mdui-textfield-helper">下联只能使用汉字，并且须和上联长度相同</div>
+                            </div>
+                            <label class="mdui-switch">
+                                <input type="checkbox" id="rtl"/>
+                                <i class="mdui-switch-icon"></i>
+                                横批从右往左
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mdui-panel-item">
+                        <div class="mdui-panel-item-header">
+                            <div class="mdui-panel-item-title"><i class="mdui-icon material-icons">image</i> 背景</div>
+                            <i class="mdui-panel-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
+                        </div>
+                        <div class="mdui-panel-item-body">
+                            <form id="choose">
+                            </form>
+                        </div>
+                    </div>
+                    <div class="mdui-panel-item">
+                        <div class="mdui-panel-item-header">
+                            <div class="mdui-panel-item-title"><i class="mdui-icon material-icons">font_download</i> 字体
+                            </div>
+                            <i class="mdui-panel-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>
+                        </div>
+                        <div class="mdui-panel-item-body">
+                            <select class="mdui-select" id="font-select" onchange="fontChange();">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <button class="mdui-btn mdui-btn-raised mdui-color-indigo mdui-ripple" onclick="generate();">生成</button>
+                <button class="mdui-btn mdui-btn-raised mdui-color-indigo mdui-ripple"
+                    mdui-menu="{target: '#download'}">下载</button>
+                <ul class="mdui-menu" id="download">
+                    <li class="mdui-menu-item">
+                        <a href="javascript:download($('#cv-pi'),0)" class="mdui-ripple">横批</a>
+                    </li>
+                    <li class="mdui-menu-item">
+                        <a href="javascript:download($('#cv-shang'),1)" class="mdui-ripple">上联</a>
+                    </li>
+                    <li class="mdui-menu-item">
+                        <a href="javascript:download($('#cv-xia'),2)" class="mdui-ripple">下联</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div id="infomation" class="mdui-dialog">
+        <div class="mdui-dialog-content">
+            <div class="mdui-row mdui-typo">
+                <div class="mdui-col-xs-4">
+                    <img src="logo.svg">
+                </div>
+                <div class="mdui-col-xs-8">
+                    <h2>SpringFestivalCoupletGenerator</h2>
+                    <h4>Version 1.0.0</h4>
+                    <hr>
+                    <p>春联生成器是一个由<a href="https://github.com/XHG78999">XHG78999</a>开发的开源项目。</p>
+                    <p>如果你发现了BUG，可以前往<a href="https://github.com/XHG78999/SpringFestivalCoupletGenerator">项目主页</a>报告。
+                    </p>
+                    <p>如果您喜欢这个项目，可以<a href="https://afdian.net/@xhg78999">前往赞助</a>。</p>
+                    <hr>
+                    <p>商业用途请先与我联系。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
